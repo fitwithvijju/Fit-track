@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#10131b">
+<meta name="description" content="Your personal fitness, nutrition and workout tracker.">
+<link rel="manifest" href="manifest.json">
+<title>FitTrack – Personal Fitness</title>
+<style>
+:root{--bg:#0d1017;--panel:#171c27;--panel2:#202737;--text:#f4f6fb;--muted:#9aa5b7;--line:#2a3445;--green:#a5f06b;--blue:#75baff;--orange:#ffbd72;--pink:#f28bc0}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px system-ui,-apple-system,Segoe UI,sans-serif;padding-bottom:88px}
+header{padding:22px 18px 14px;display:flex;justify-content:space-between;align-items:center;max-width:760px;margin:auto}
+.brand{font-size:21px;font-weight:850;letter-spacing:-.7px}.brand span{color:var(--green)}.sub{color:var(--muted);font-size:12px;margin-top:3px}
+main{max-width:760px;margin:auto;padding:0 16px}.screen{display:none}.screen.active{display:block}
+h1{font-size:25px;margin:8px 0 4px;letter-spacing:-.8px}h2{font-size:17px;margin:0 0 12px}p{color:var(--muted);line-height:1.45}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:15px;margin-bottom:12px}.wide{grid-column:1/-1}
+.metric{font-size:27px;font-weight:800;letter-spacing:-1px}.metric small{font-size:12px;color:var(--muted);font-weight:500;letter-spacing:0}.label{color:var(--muted);font-size:12px}.accent{color:var(--green)}.blue{color:var(--blue)}.orange{color:var(--orange)}
+.bar{height:7px;border-radius:20px;background:#30394a;overflow:hidden;margin-top:10px}.bar i{display:block;height:100%;background:var(--green);border-radius:20px;width:0%}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px}.muted{color:var(--muted)}.tiny{font-size:11px;color:var(--muted)}
+button,input,select{font:inherit}button{border:0;border-radius:12px;padding:11px 14px;background:var(--green);color:#10150d;font-weight:750;cursor:pointer}.secondary{background:var(--panel2);color:var(--text);border:1px solid var(--line)}.danger{background:#482733;color:#ffd5df}.smallbtn{padding:8px 10px;font-size:12px}
+input,select{width:100%;background:#10151f;color:var(--text);border:1px solid var(--line);border-radius:11px;padding:12px;outline:none}label{display:block;font-size:12px;color:var(--muted);margin:10px 0 6px}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.formgrid .full{grid-column:1/-1}
+nav{position:fixed;bottom:0;left:0;right:0;background:#111722f2;border-top:1px solid var(--line);display:flex;justify-content:center;padding:9px 5px calc(9px + env(safe-area-inset-bottom));z-index:5;backdrop-filter:blur(16px)}
+nav button{background:transparent;color:var(--muted);padding:7px 8px;flex:1;max-width:145px;font-size:11px;font-weight:650}nav button.active{color:var(--green);background:#253322}
+nav b{display:block;font-size:18px;margin-bottom:2px}
+.item{padding:11px 0;border-bottom:1px solid var(--line)}.item:last-child{border:0}.pill{font-size:11px;padding:4px 8px;border-radius:20px;background:#263344;color:#c8d9ee}
+.circle{width:94px;height:94px;border-radius:50%;border:8px solid #30394a;border-top-color:var(--green);display:flex;align-items:center;justify-content:center;flex-direction:column}
+.empty{color:var(--muted);font-size:13px;text-align:center;padding:20px 8px}
+.toast{position:fixed;bottom:92px;left:50%;transform:translateX(-50%);background:#e5f8d8;color:#17210f;padding:10px 15px;border-radius:20px;font-size:13px;font-weight:700;display:none;z-index:10}
+a{color:var(--green)}
+@media(min-width:600px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}.metric{font-size:30px}}
+</style>
+</head>
+<body>
+<header><div><div class="brand">FIT<span>TRACK</span></div><div class="sub">YOUR PERSONAL FITNESS COMPANION</div></div><div class="pill" id="todayPill">TODAY</div></header>
+<main>
+<section id="home" class="screen active">
+<h1>Let's get stronger.</h1><p id="dateText">Your daily progress at a glance.</p>
+<div class="grid">
+<div class="card"><div class="label">STEPS TODAY</div><div class="metric" id="stepVal">0</div><div class="tiny">Goal: <span id="stepGoalText">10,000</span></div><div class="bar"><i id="stepBar"></i></div><div style="margin-top:10px"><button class="secondary smallbtn" onclick="quickSteps()">＋ Add steps</button></div></div>
+<div class="card"><div class="label">CALORIES EATEN</div><div class="metric" id="calVal">0 <small>kcal</small></div><div class="tiny">Daily target: <span id="calGoalText">2,200</span></div><div class="bar"><i id="calBar"></i></div></div>
+<div class="card"><div class="label">PROTEIN</div><div class="metric accent" id="proteinVal">0g</div><div class="tiny">Target: <span id="proteinGoalText">160</span>g</div><div class="bar"><i id="proteinBar"></i></div></div>
+<div class="card"><div class="label">WATER</div><div class="metric blue" id="waterVal">0 <small>ml</small></div><div class="tiny">Goal: <span id="waterGoalText">3,000</span> ml</div><div class="bar"><i id="waterBar"></i></div><div style="margin-top:10px"><button class="secondary smallbtn" onclick="addWater(250)">＋ 250 ml</button></div></div>
+</div>
+<div class="card"><div class="row"><h2>Today's macros</h2><span class="tiny">From logged food</span></div>
+<div class="grid">
+<div><div class="label">CARBS</div><b id="carbVal">0g</b></div><div><div class="label">FAT</div><b id="fatVal">0g</b></div><div><div class="label">FIBER</div><b id="fiberVal">0g</b></div><div><div class="label">FOOD ENTRIES</div><b id="foodCount">0</b></div>
+</div></div>
+<div class="card"><div class="row"><h2>Today's workout</h2><span class="pill" id="workoutCount">0 exercises</span></div><div id="homeWorkout" class="empty">No workout logged yet. Add your first exercise in Workout.</div></div>
+<div class="card"><div class="row"><h2>Body weight</h2><button class="secondary smallbtn" onclick="showTab('progress')">Update</button></div><div class="metric" id="homeWeight">— <small>kg</small></div><div class="tiny">Latest recorded weight</div></div>
+</section>
+
+<section id="food" class="screen">
+<h1>Nutrition</h1><p>Track calories and macros for every meal.</p>
+<div class="card"><h2>Add food</h2>
+<label>Food item</label><input id="foodName" list="foodOptions" placeholder="e.g. Chicken breast">
+<datalist id="foodOptions"></datalist>
+<div class="formgrid">
+<div><label>Meal</label><select id="foodMeal"><option>Breakfast</option><option>Lunch</option><option>Snacks</option><option>Dinner</option></select></div>
+<div><label>Quantity (g)</label><input id="foodQty" type="number" min="1" value="100"></div>
+<div><label>Calories (per 100g)</label><input id="foodCal" type="number" min="0" placeholder="kcal"></div>
+<div><label>Protein (g/100g)</label><input id="foodProtein" type="number" min="0" step=".1" placeholder="g"></div>
+<div><label>Carbs (g/100g)</label><input id="foodCarb" type="number" min="0" step=".1" placeholder="g"></div>
+<div><label>Fat (g/100g)</label><input id="foodFat" type="number" min="0" step=".1" placeholder="g"></div>
+<div><label>Fiber (g/100g)</label><input id="foodFiber" type="number" min="0" step=".1" placeholder="g"></div>
+</div><p class="tiny">Choose a food suggestion to auto-fill typical values, or enter the nutrition from your package/recipe. Values vary by brand and preparation.</p>
+<button onclick="addFood()">Add to food diary</button>
+</div>
+<div class="card"><div class="row"><h2>Food diary</h2><span class="pill" id="diaryDate"></span></div><div id="foodList"></div></div>
+</section>
+
+<section id="workout" class="screen">
+<h1>Workout</h1><p>Record your gym sessions and progressive overload.</p>
+<div class="card"><h2>Log an exercise</h2>
+<label>Exercise name</label><input id="exerciseName" list="exerciseOptions" placeholder="e.g. Bench press"><datalist id="exerciseOptions"><option>Bench press</option><option>Incline dumbbell press</option><option>Lat pulldown</option><option>Seated cable row</option><option>Squat</option><option>Leg press</option><option>Shoulder press</option><option>Bicep curl</option><option>Triceps pushdown</option><option>Deadlift</option><option>Treadmill</option></datalist>
+<div class="formgrid"><div><label>Sets</label><input id="sets" type="number" min="1" value="3"></div><div><label>Reps</label><input id="reps" type="number" min="1" value="12"></div><div><label>Weight (kg)</label><input id="liftWeight" type="number" min="0" step=".5" value="0"></div><div><label>Muscle group</label><select id="muscle"><option>Chest</option><option>Back</option><option>Shoulders</option><option>Arms</option><option>Legs</option><option>Abs</option><option>Cardio</option><option>Other</option></select></div></div>
+<label>Notes (optional)</label><input id="workNotes" placeholder="How did it feel?">
+<button style="margin-top:12px" onclick="addWorkout()">Save exercise</button></div>
+<div class="card"><div class="row"><h2>Today's session</h2><span class="pill" id="workDate"></span></div><div id="workList"></div></div>
+</section>
+
+<section id="progress" class="screen">
+<h1>Your progress</h1><p>Keep a record of your body and daily targets.</p>
+<div class="card"><h2>Profile & daily goals</h2><div class="formgrid">
+<div><label>Current weight (kg)</label><input id="profileWeight" type="number" step=".1" placeholder="e.g. 75"></div>
+<div><label>Height (cm)</label><input id="profileHeight" type="number" placeholder="e.g. 170"></div>
+<div><label>Age</label><input id="profileAge" type="number" placeholder="e.g. 25"></div>
+<div><label>Goal weight (kg)</label><input id="goalWeight" type="number" step=".1" placeholder="e.g. 70"></div>
+<div><label>Calories target</label><input id="goalCalories" type="number" value="2200"></div>
+<div><label>Protein target (g)</label><input id="goalProtein" type="number" value="160"></div>
+<div><label>Steps target</label><input id="goalSteps" type="number" value="10000"></div>
+<div><label>Water target (ml)</label><input id="goalWater" type="number" value="3000"></div>
+</div><button style="margin-top:12px" onclick="saveProfile()">Save profile & goals</button></div>
+<div class="card"><h2>Log body weight</h2><div class="row"><input id="weightEntry" type="number" step=".1" placeholder="Weight in kg"><button onclick="addWeight()">Save</button></div><div id="weightList"></div></div>
+<div class="card"><h2>Daily activity</h2><label>Enter today's step count</label><div class="row"><input id="stepEntry" type="number" min="0" placeholder="e.g. 8500"><button onclick="saveSteps()">Save steps</button></div><p class="tiny">Manual step entry for this first version. Automatic phone step integration will come with the native Android version.</p></div>
+<div class="card"><h2>Backup your data</h2><p class="tiny">Export your records as a JSON backup. Keep it somewhere safe. Data is stored in this browser on this device.</p><div class="row"><button class="secondary" onclick="exportData()">Export backup</button><button class="danger" onclick="clearData()">Reset all data</button></div><label>Restore backup</label><input type="file" id="restoreFile" accept=".json,application/json" onchange="importData(event)"></div>
+</section>
+</main>
+<nav>
+<button class="active" data-tab="home" onclick="showTab('home')"><b>⌂</b>Home</button>
+<button data-tab="food" onclick="showTab('food')"><b>◉</b>Nutrition</button>
+<button data-tab="workout" onclick="showTab('workout')"><b>▤</b>Workout</button>
+<button data-tab="progress" onclick="showTab('progress')"><b>↗</b>Progress</button>
+</nav><div id="toast" class="toast"></div>
+<script>
+const KEY='fittrack_v1';
+const today=()=>new Date().toISOString().slice(0,10);
+const defaultData={profile:{weight:'',height:'',age:'',goalWeight:'',calories:2200,protein:160,steps:10000,water:3000},days:{},weights:[]};
+let db=load();
+function load(){try{return {...defaultData,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch(e){return structuredClone(defaultData)}}
+function save(){localStorage.setItem(KEY,JSON.stringify(db));render()}
+function day(){if(!db.days[today()])db.days[today()]={foods:[],workouts:[],steps:0,water:0};return db.days[today()]}
+function num(id){return Math.max(0,Number(document.getElementById(id).value)||0)}
+function fmt(n){return Math.round(n*10)/10}
+function toast(t){let e=document.getElementById('toast');e.textContent=t;e.style.display='block';setTimeout(()=>e.style.display='none',1900)}
+const foods={
+'Oats, dry':[389,16.9,66.3,6.9,10.6],
+'Egg, whole':[143,12.6,0.7,9.5,0],
+'Chicken breast, cooked':[165,31,0,3.6,0],
+'Chicken breast, raw':[120,22.5,0,2.6,0],
+'Rice, cooked white':[130,2.7,28.2,.3,.4],
+'Sweet potato, boiled':[76,1.4,17.7,.1,2.5],
+'Milk, whole':[61,3.2,4.8,3.3,0],
+'Curd, plain':[61,3.5,4.7,3.3,0],
+'Banana':[89,1.1,22.8,.3,2.6],
+'Apple':[52,.3,13.8,.2,2.4],
+'Almonds':[579,21.2,21.6,49.9,12.5],
+'Paneer':[265,18.3,1.2,20.8,0],
+'Dal, cooked':[116,9,20,0.4,7.9],
+'Idli':[146,4.5,30,0.7,1.5],
+'Dosa, plain':[168,4,29,3.7,1.5],
+'Whey protein powder':[400,80,8,6,1],
+'Prawns, cooked':[99,24,0.2,.3,0],
+'Cucumber':[15,.7,3.6,.1,.5]
+};
+function fillFood(){let dl=document.getElementById('foodOptions');dl.innerHTML=Object.keys(foods).map(x=>`<option value="${x}">`).join('');document.getElementById('foodName').addEventListener('change',()=>{let v=foods[document.getElementById('foodName').value];if(v){['foodCal','foodProtein','foodCarb','foodFat','foodFiber'].forEach((id,i)=>document.getElementById(id).value=v[i])}})}
+function addFood(){let name=document.getElementById('foodName').value.trim(),qty=num('foodQty');if(!name||!qty){toast('Enter a food and quantity');return}let vals=['foodCal','foodProtein','foodCarb','foodFat','foodFiber'].map(num);if(!document.getElementById('foodCal').value){toast('Enter nutrition values per 100g');return}day().foods.push({id:Date.now(),name,meal:document.getElementById('foodMeal').value,qty,cal:vals[0]*qty/100,protein:vals[1]*qty/100,carb:vals[2]*qty/100,fat:vals[3]*qty/100,fiber:vals[4]*qty/100});['foodName','foodCal','foodProtein','foodCarb','foodFat','foodFiber'].forEach(id=>document.getElementById(id).value='');document.getElementById('foodQty').value=100;save();toast('Food added to diary')}
+function addWorkout(){let name=document.getElementById('exerciseName').value.trim();if(!name){toast('Enter an exercise');return}day().workouts.push({id:Date.now(),name,sets:num('sets'),reps:num('reps'),weight:num('liftWeight'),muscle:document.getElementById('muscle').value,notes:document.getElementById('workNotes').value});document.getElementById('exerciseName').value='';document.getElementById('workNotes').value='';save();toast('Workout saved')}
+function removeEntry(type,id){let a=day()[type];day()[type]=a.filter(x=>x.id!==id);save()}
+function addWater(n){day().water+=n;save();toast(n+' ml water added')}
+function quickSteps(){let v=prompt('Enter total steps for today',day().steps||'');if(v!==null){day().steps=Math.max(0,Number(v)||0);save()}}
+function saveSteps(){day().steps=num('stepEntry');save();toast('Steps saved')}
+function saveProfile(){db.profile={weight:document.getElementById('profileWeight').value,height:document.getElementById('profileHeight').value,age:document.getElementById('profileAge').value,goalWeight:document.getElementById('goalWeight').value,calories:num('goalCalories')||2200,protein:num('goalProtein')||160,steps:num('goalSteps')||10000,water:num('goalWater')||3000};save();toast('Profile and goals saved')}
+function addWeight(){let w=num('weightEntry');if(!w){toast('Enter your weight');return}db.weights.push({date:today(),weight:w});db.profile.weight=w;document.getElementById('weightEntry').value='';save();toast('Weight recorded')}
+function render(){let d=day(),p=db.profile,tot={cal:0,protein:0,carb:0,fat:0,fiber:0};d.foods.forEach(f=>Object.keys(tot).forEach(k=>tot[k]+=f[k]||0));
+const set=(id,v)=>document.getElementById(id).textContent=v;
+set('stepVal',d.steps.toLocaleString());set('stepGoalText',p.steps.toLocaleString());set('calVal',fmt(tot.cal)+' kcal');set('calGoalText',p.calories.toLocaleString());set('proteinVal',fmt(tot.protein)+'g');set('proteinGoalText',p.protein);set('waterVal',d.water.toLocaleString()+' ml');set('waterGoalText',p.water.toLocaleString());set('carbVal',fmt(tot.carb)+'g');set('fatVal',fmt(tot.fat)+'g');set('fiberVal',fmt(tot.fiber)+'g');set('foodCount',d.foods.length);set('workoutCount',d.workouts.length+' exercises');set('homeWeight',p.weight||'—');
+[['stepBar',d.steps,p.steps],['calBar',tot.cal,p.calories],['proteinBar',tot.protein,p.protein],['waterBar',d.water,p.water]].forEach(([id,a,b])=>document.getElementById(id).style.width=Math.min(100,b?a/b*100:0)+'%');
+set('dateText',new Date().toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'}));set('todayPill',new Date().toLocaleDateString(undefined,{month:'short',day:'numeric'}));set('diaryDate',today());set('workDate',today());
+document.getElementById('foodList').innerHTML=d.foods.length?d.foods.map(f=>`<div class="item row"><div><b>${esc(f.name)}</b><div class="tiny">${f.meal} · ${f.qty}g · P ${fmt(f.protein)}g / C ${fmt(f.carb)}g / F ${fmt(f.fat)}g</div></div><div style="text-align:right"><b>${Math.round(f.cal)} kcal</b><br><button class="danger smallbtn" onclick="removeEntry('foods',${f.id})">Delete</button></div></div>`).join(''):'<div class="empty">No food logged today. Add your first meal above.</div>';
+document.getElementById('workList').innerHTML=d.workouts.length?d.workouts.map(w=>`<div class="item row"><div><b>${esc(w.name)}</b><div class="tiny">${w.muscle} · ${w.sets} sets × ${w.reps} reps · ${w.weight} kg ${w.notes?'· '+esc(w.notes):''}</div></div><button class="danger smallbtn" onclick="removeEntry('workouts',${w.id})">Delete</button></div>`).join(''):'<div class="empty">No exercises logged today.</div>';
+document.getElementById('homeWorkout').textContent=d.workouts.length?d.workouts.map(w=>w.name).join(' · '):'No workout logged yet. Add your first exercise in Workout.';
+document.getElementById('weightList').innerHTML=db.weights.slice().reverse().slice(0,10).map(w=>`<div class="item row"><span>${w.date}</span><b>${w.weight} kg</b></div>`).join('')||'<div class="empty">No weight entries yet.</div>';
+}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function showTab(t){document.querySelectorAll('.screen').forEach(e=>e.classList.toggle('active',e.id===t));document.querySelectorAll('nav button').forEach(e=>e.classList.toggle('active',e.dataset.tab===t));window.scrollTo(0,0)}
+function exportData(){let blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='fittrack-backup-'+today()+'.json';a.click();URL.revokeObjectURL(a.href)}
+function importData(ev){let f=ev.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!x.days||!x.profile)throw 0;db=x;save();toast('Backup restored')}catch(e){toast('Invalid backup file')}};r.readAsText(f)}
+function clearData(){if(confirm('Delete all FitTrack records from this browser? Export a backup first if needed.')){localStorage.removeItem(KEY);db=load();save();toast('All records reset')}}
+function initProfile(){let p=db.profile;[['profileWeight','weight'],['profileHeight','height'],['profileAge','age'],['goalWeight','goalWeight'],['goalCalories','calories'],['goalProtein','protein'],['goalSteps','steps'],['goalWater','water']].forEach(([id,k])=>document.getElementById(id).value=p[k]??'')}
+fillFood();initProfile();render();
+if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+</script>
+</body></html>
